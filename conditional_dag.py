@@ -24,17 +24,18 @@ class Router:
         self.adder = adder.options(use_new_handle_api=True)
         self.multiplier = multiplier.options(use_new_handle_api=True)
 
+        self.logger.info("App is initialized!")
+        self.logger.info("Testing logger: This is an INFO log!")
+        self.logger.warning("Testing logger: This is an WARN log!")
+        self.logger.debug("Testing logger: This is an DEBUG log!")
+        self.logger.error("Testing logger: This is an ERROR log!")
+
     async def route(self, op: Operation, input: int) -> int:
         if op == Operation.ADDITION:
             amount = await self.adder.add.remote(input)
         elif op == Operation.MULTIPLICATION:
             amount = await self.multiplier.multiply.remote(input)
 
-        self.logger.info("Testing logger: This is an INFO log!")
-        self.logger.warning("Testing logger: This is an WARN log!")
-        self.logger.debug("Testing logger: This is an DEBUG log!")
-        self.logger.error("Testing logger: This is an ERROR log!")
-        
         return f"{amount} pizzas please!"
 
     async def __call__(self, request: starlette.requests.Request):
