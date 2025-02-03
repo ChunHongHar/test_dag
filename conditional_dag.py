@@ -36,6 +36,11 @@ class Router:
         elif op == Operation.MULTIPLICATION:
             amount = await self.multiplier.multiply.remote(input)
 
+        self.logger.info("Testing logger: This is an INFO log!")
+        self.logger.warning("Testing logger: This is an WARN log!")
+        self.logger.debug("Testing logger: This is an DEBUG log!")
+        self.logger.error("Testing logger: This is an ERROR log!")
+
         return f"{amount} pizzas please!"
 
     async def __call__(self, request: starlette.requests.Request):
