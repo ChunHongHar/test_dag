@@ -1,3 +1,4 @@
+import logging
 import os
 from enum import Enum
 from typing import Dict
@@ -18,6 +19,8 @@ class Operation(str, Enum):
 )
 class Router:
     def __init__(self, multiplier, adder):
+        self.logger = logging.getLogger("ray.serve")
+
         self.adder = adder.options(use_new_handle_api=True)
         self.multiplier = multiplier.options(use_new_handle_api=True)
 
@@ -26,6 +29,11 @@ class Router:
             amount = await self.adder.add.remote(input)
         elif op == Operation.MULTIPLICATION:
             amount = await self.multiplier.multiply.remote(input)
+
+        self.logger.info("Testing logger: This is an INFO log!")
+        self.logger.warning("Testing logger: This is an WARN log!")
+        self.logger.debug("Testing logger: This is an DEBUG log!")
+        self.logger.error("Testing logger: This is an ERROR log!")
         
         return f"{amount} pizzas please!"
 
