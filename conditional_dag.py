@@ -1,28 +1,25 @@
-import logging
-import os
-from enum import Enum
-from typing import Dict
 
-import starlette.requests
+from fastapi import FastAPI
+from pydantic import BaseModel
+
 from ray import serve
 
-
-class Operation(str, Enum):
-    ADDITION = "ADD"
-    MULTIPLICATION = "MUL"
+app = FastAPI()
 
 
-@serve.deployment(
-    ray_actor_options={
-        "num_cpus": 0.1,
-    }
-)
-class Router:
-    def __init__(self, multiplier, adder):
-        self.logger = logging.getLogger("ray.serve")
+class InputInterface(BaseModel):
+    user_input: str
 
-        self.adder = adder.options(use_new_handle_api=True)
-        self.multiplier = multiplier.options(use_new_handle_api=True)
+
+class OutputInterface(BaseModel):
+    message: str
+
+
+@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.1})
+@serve.ingress(app)
+class DemoApplication:
+    def __init__(self):
+        self.message = "This is a Demo Application!"
 
         self.logger.info("App is initialized!")
         self.logger.info("Testing logger: This is an INFO log!")
@@ -30,88 +27,13 @@ class Router:
         self.logger.debug("Testing logger: This is an DEBUG log!")
         self.logger.error("Testing logger: This is an ERROR log!")
 
-    async def route(self, op: Operation, input: int) -> int:
-        if op == Operation.ADDITION:
-            amount = await self.adder.add.remote(input)
-        elif op == Operation.MULTIPLICATION:
-            amount = await self.multiplier.multiply.remote(input)
+    def run(self, input: InputInterface) -> OutputInterface:
+        user_message = input.user_input
+        processed_user_message = self.preprocess_user_message(user_message)
+        return OutputInterface(message=processed_user_message)
 
-        self.logger.info("Testing logger: This is an INFO log!")
-        self.logger.warning("Testing logger: This is an WARN log!")
-        self.logger.debug("Testing logger: This is an DEBUG log!")
-        self.logger.error("Testing logger: This is an ERROR log!")
-
-        return f"{amount} pizzas please!"
-
-    async def __call__(self, request: starlette.requests.Request):
-        op, input = await request.json()
-        return await self.route(op, input)
-
-@serve.deployment(
-    user_config={
-        "factor": 3,
-    },
-    ray_actor_options={
-        "num_cpus": 0.1,
-        "runtime_env": {
-            "env_vars": {
-                "override_factor": "-2",
-            }
-        },
-    },
-)
-class Multiplier:
-    def __init__(self, factor: int):
-        self.factor = factor
-
-    def reconfigure(self, config: Dict):
-        self.factor = config.get("factor", -1)
-
-    def multiply(self, input_factor: int) -> int:
-        if os.getenv("override_factor") is not None:
-            return input_factor * int(os.getenv("override_factor"))
-        return input_factor * self.factor
+    def preprocess_user_message(self, user_message: str) -> str:
+        return f"{user_message} {self.message}"
 
 
-@serve.deployment(
-    user_config={
-        "increment": 2,
-    },
-    ray_actor_options={
-        "num_cpus": 0.1,
-        "runtime_env": {
-            "env_vars": {
-                "override_increment": "-2",
-            }
-        },
-    },
-)
-class Adder:
-    def __init__(self, increment: int):
-        self.increment = increment
-
-    def reconfigure(self, config: Dict):
-        self.increment = config.get("increment", -1)
-
-    def add(self, input: int) -> int:
-        if os.getenv("override_increment") is not None:
-            return input + int(os.getenv("override_increment"))
-        return input + self.increment
-
-
-@serve.deployment(
-    ray_actor_options={
-        "num_cpus": 0.1,
-    }
-)
-def create_order(amount: int) -> str:
-    return f"{amount} pizzas please!"
-
-
-# Overwritten by user_config
-ORIGINAL_INCREMENT = 1
-ORIGINAL_FACTOR = 1
-
-multiplier = Multiplier.bind(ORIGINAL_FACTOR)
-adder = Adder.bind(ORIGINAL_INCREMENT)
-serve_dag = Router.bind(multiplier, adder)
+app = DemoApplication.bind()
