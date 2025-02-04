@@ -1,4 +1,4 @@
-
+import logging
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -20,6 +20,8 @@ class OutputInterface(BaseModel):
 class DemoApplication:
     def __init__(self):
         self.message = "This is a Demo Application!"
+
+        self.logger = logging.getLogger("ray.serve")
 
         self.logger.info("App is initialized!")
         self.logger.info("Testing logger: This is an INFO log!")
