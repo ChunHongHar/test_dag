@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from ray import serve
+from ray.serve.schema import LoggingConfig
 
 app = FastAPI()
 
@@ -15,7 +16,7 @@ class OutputInterface(BaseModel):
     message: str
 
 
-@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.1})
+@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.1}, logging_config=LoggingConfig(encoding="JSON"))
 @serve.ingress(app)
 class DemoApplication:
     def __init__(self):
