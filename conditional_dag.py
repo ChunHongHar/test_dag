@@ -30,6 +30,7 @@ class DemoApplication:
         self.logger.debug("Testing logger: This is an DEBUG log!")
         self.logger.error("Testing logger: This is an ERROR log!")
 
+    @app.post("/run")
     def run(self, input: InputInterface) -> OutputInterface:
         user_message = input.user_input
         processed_user_message = self.preprocess_user_message(user_message)
