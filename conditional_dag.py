@@ -27,7 +27,8 @@ class BackgroundTasks(threading.Thread):
         self.failed = True
 
     def run(self, *args, **kwargs):
-        raise Exception
+        pass
+        # raise Exception
 
     def stop(self):
         self.is_stopped = True
@@ -74,10 +75,8 @@ class DemoApplication:
     async def check_health(self):
         await asyncio.sleep(10)
 
-        # if not self.background_task.failed:
-        #     raise Exception
-
-        raise Exception
+        if not self.background_task.failed:
+            raise Exception
 
     def __del__(self):
         self.stop_background_task()
