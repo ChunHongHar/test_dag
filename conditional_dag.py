@@ -71,12 +71,17 @@ class DemoApplication:
             self.background_task.stop()
             del self.background_task
 
-    # Ray internal health check
-    async def check_health(self):
-        await asyncio.sleep(10)
+    def restart_thread(self, args):
+        self.background_task = BackgroundTasks(current_active_actor_id=self.current_active_actor_id)
+        self.background_task.start()
+        self.logger.warning("THREAD FAILED! RESTARTING.")
 
-        if not self.background_task.failed:
-            raise Exception
+    # # Ray internal health check
+    # async def check_health(self):
+    #     await asyncio.sleep(10)
+
+    #     if not self.background_task.failed:
+    #         raise Exception
 
     def __del__(self):
         self.stop_background_task()
