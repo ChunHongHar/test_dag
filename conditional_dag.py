@@ -27,8 +27,7 @@ class BackgroundTasks(threading.Thread):
         self.failed = True
 
     def run(self, *args, **kwargs):
-        pass
-        # raise Exception
+        raise Exception
 
     def stop(self):
         self.is_stopped = True
