@@ -64,6 +64,7 @@ class DemoApplication:
             current_active_actor_id=self.current_active_actor_id
         )
         self.background_task.start()
+        threading.excepthook = self.restart_thread
 
     def stop_background_task(self):
         if hasattr(self, "background_task"):
