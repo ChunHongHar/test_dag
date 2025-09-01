@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import threading
 from fastapi import FastAPI
@@ -23,6 +24,7 @@ class BackgroundTasks(threading.Thread):
         super().__init__()
         self.is_stopped = False
         self.current_active_actor_id = current_active_actor_id
+        self.failed = True
 
     def run(self, *args, **kwargs):
         raise Exception
@@ -67,6 +69,13 @@ class DemoApplication:
         if hasattr(self, "background_task"):
             self.background_task.stop()
             del self.background_task
+
+    # Ray internal health check
+    async def check_health(self):
+        await asyncio.sleep(10)
+
+        if not self.background_task.failed:
+            raise Exception
 
     def __del__(self):
         self.stop_background_task()
