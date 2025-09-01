@@ -74,8 +74,10 @@ class DemoApplication:
     async def check_health(self):
         await asyncio.sleep(10)
 
-        if not self.background_task.failed:
-            raise Exception
+        # if not self.background_task.failed:
+        #     raise Exception
+
+        raise Exception
 
     def __del__(self):
         self.stop_background_task()
