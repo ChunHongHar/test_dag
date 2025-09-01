@@ -2,6 +2,7 @@ import asyncio
 import logging
 import threading
 from fastapi import FastAPI
+from listener_util import Listener
 from pydantic import BaseModel
 
 import ray
@@ -27,7 +28,8 @@ class BackgroundTasks(threading.Thread):
         self.failed = True
 
     def run(self, *args, **kwargs):
-        raise Exception
+        listener_obj = Listener(logger=logging.getLogger("ray.serve"))
+        listener_obj._listen()
 
     def stop(self):
         self.is_stopped = True
