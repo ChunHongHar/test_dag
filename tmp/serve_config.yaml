@@ -1,0 +1,25 @@
+grpc_options:
+  port: 9000
+  grpc_servicer_functions: []
+logging_config:
+  encoding: TEXT
+  log_level: INFO
+  logs_dir: null
+  enable_access_log: true
+  additional_log_standard_attrs: []
+applications:
+- name: app1
+  route_prefix: /
+  import_path: server:app
+  runtime_env: {}
+  deployments:
+  - name: DemoApplication
+    num_replicas: 1
+    ray_actor_options:
+      num_cpus: 0.1
+    logging_config:
+      encoding: JSON
+      log_level: INFO
+      logs_dir: null
+      enable_access_log: true
+      additional_log_standard_attrs: []
