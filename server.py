@@ -1,13 +1,13 @@
-import asyncio
 import logging
 import threading
-from fastapi import FastAPI
-from listener_util import Listener
-from pydantic import BaseModel
 
 import ray
+from fastapi import FastAPI
+from pydantic import BaseModel
 from ray import serve
 from ray.serve.schema import LoggingConfig
+
+from listener_util import Listener
 
 app = FastAPI()
 
@@ -35,7 +35,11 @@ class BackgroundTasks(threading.Thread):
         self.is_stopped = True
 
 
-@serve.deployment(num_replicas=1, ray_actor_options={"num_cpus": 0.1}, logging_config=LoggingConfig(encoding="JSON"))
+@serve.deployment(
+    num_replicas=1,
+    ray_actor_options={"num_cpus": 0.1},
+    logging_config=LoggingConfig(encoding="JSON"),
+)
 @serve.ingress(app)
 class DemoApplication:
     def __init__(self):
@@ -48,7 +52,7 @@ class DemoApplication:
         self.logger.warning("Testing logger: This is an WARN log!")
         self.logger.debug("Testing logger: This is an DEBUG log!")
         self.logger.error("Testing logger: This is an ERROR log!")
-        
+
         self.current_active_actor_id = ray.get_runtime_context().get_actor_id()
         self.start_background_task()
 
@@ -74,8 +78,9 @@ class DemoApplication:
             del self.background_task
 
     def restart_thread(self, args):
-        self.background_task = BackgroundTasks(current_active_actor_id=self.current_active_actor_id)
-        self.background_task.start()
+        self.background_task = BackgroundTasks(
+            current_active_actor_id=self.current_active_actor_id
+        )
         self.logger.warning("THREAD FAILED! RESTARTING.")
 
     # # Ray internal health check
